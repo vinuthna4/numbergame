@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Guess the Number Game</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #fbc2eb, #a6c1ee);
+      text-align: center;
+      padding: 50px;
+    }
+
+    #game-box {
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      padding: 30px;
+      display: inline-block;
+      max-width: 400px;
+    }
+
+    input, button, select {
+      padding: 10px;
+      font-size: 16px;
+      margin: 10px;
+    }
+
+    #result {
+      font-weight: bold;
+      font-size: 18px;
+      margin-top: 20px;
+    }
+
+    #attempts, #history {
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🎯 Guess the Number</h1>
+
+  <div id="game-box">
+    <label for="difficulty"><strong>Difficulty:</strong></label>
+    <select id="difficulty" onchange="setDifficulty()">
+      <option value="50">Easy (1–50)</option>
+      <option value="100" selected>Medium (1–100)</option>
+      <option value="200">Hard (1–200)</option>
+    </select>
+
+    <br>
+    <input type="number" id="guessInput" placeholder="Enter your guess" />
+    <br>
+    <button onclick="checkGuess()">Submit Guess</button>
+    <button onclick="resetGame()">Reset Game</button>
+    
+    <p id="result"></p>
+    <p id="attempts">Attempts: 0</p>
+    <p id="history"></p>
+  </div>
+
+  <script>
+    let maxRange = 100;
+    let randomNumber = Math.floor(Math.random() * maxRange) + 1;
+    let attempts = 0;
+    let guessHistory = [];
+    let startTime = null;
+    let gameOver = false;
+
+    function setDifficulty() {
+      maxRange = parseInt(document.getElementById("difficulty").value);
+      resetGame();
+    }
+
+    function checkGuess() {
+      if (gameOver) return;
+
+      const guess = parseInt(document.getElementById("guessInput").value);
+      const result = document.getElementById("result");
+
+      if (!startTime) startTime = new Date();
+
+      if (isNaN(guess) || guess < 1 || guess > maxRange) {
+        result.textContent = `🚫 Enter a number between 1 and ${maxRange}.`;
+        result.style.color = "red";
+        return;
+      }
+
+      attempts++;
+      guessHistory.push(guess);
+
+      if (guess === randomNumber) {
+        const timeTaken = Math.floor((new Date() - startTime) / 1000);
+        result.textContent = `🎉 Correct! You guessed it in ${attempts} attempts and ${timeTaken} seconds.`;
+        result.style.color = "green";
+        gameOver = true;
+        document.getElementById("guessInput").disabled = true;
+      } else if (guess < randomNumber) {
+        result.textContent = "📉 Too low! Try a higher number.";
+        result.style.color = "orange";
+        if (Math.abs(guess - randomNumber) <= 5) result.textContent += " 🔥 Very close!";
+      } else {
+        result.textContent = "📈 Too high! Try a lower number.";
+        result.style.color = "orange";
+        if (Math.abs(guess - randomNumber) <= 5) result.textContent += " 🔥 Very close!";
+      }
+
+      if (attempts >= 10 && guess !== randomNumber) {
+        result.textContent = `💀 Game Over! The number was ${randomNumber}.`;
+        result.style.color = "red";
+        gameOver = true;
+        document.getElementById("guessInput").disabled = true;
+      }
+
+      document.getElementById("attempts").textContent = `Attempts: ${attempts}`;
+      document.getElementById("history").textContent = `Previous guesses: ${guessHistory.join(", ")}`;
+    }
+
+    function resetGame() {
+      randomNumber = Math.floor(Math.random() * maxRange) + 1;
+      attempts = 0;
+      guessHistory = [];
+      startTime = null;
+      gameOver = false;
+
+      document.getElementById("guessInput").value = "";
+      document.getElementById("guessInput").disabled = false;
+      document.getElementById("result").textContent = "";
+      document.getElementById("attempts").textContent = "Attempts: 0";
+      document.getElementById("history").textContent = "";
+    }
+  </script>
+
+</body>
+</html>
